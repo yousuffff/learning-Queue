@@ -3,8 +3,8 @@ import Header from "./Components/Header";
 import Stats from "./Components/Stats";
 
 import AddItemForm from "./Components/AddItemForm";
-import Filters from "./components/Filters";
-import QueueList from "./components/QueueList";
+import Filters from "./Components/Filters";
+import QueueList from "./Components/QueueList";
 
 /* ================== Helpers ================== */
 
