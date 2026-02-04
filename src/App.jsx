@@ -261,8 +261,8 @@ function App() {
   //   );
   // };
   const toggleComplete = async (id, completed) => {
-    console.log("ID TYPE:", typeof id);
-    console.log("ID VALUE:", id);
+    // console.log("ID TYPE:", typeof id);
+    // console.log("ID VALUE:", id);
 
     try {
       const res = await databases.updateDocument(
