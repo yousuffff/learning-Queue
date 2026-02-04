@@ -3,6 +3,7 @@ import { Trash2, Check, ExternalLink, Video, BookOpen } from "lucide-react";
 function QueueItem({ item, toggleComplete, deleteItem }) {
   return (
     <div
+      
       className={`bg-slate-800/50 rounded-lg p-4 border ${
         item.completed ? "border-green-500/30 opacity-75" : "border-slate-700"
       }`}
@@ -28,14 +29,14 @@ function QueueItem({ item, toggleComplete, deleteItem }) {
 
             <div className="flex gap-2">
               <button
-                onClick={() => toggleComplete(item.id)}
+                onClick={() => toggleComplete(item.$id, item.completed)}
                 className="p-2 bg-slate-700 rounded-lg"
               >
                 <Check />
               </button>
 
               <button
-                onClick={() => deleteItem(item.id)}
+                onClick={() => deleteItem(item.$id)}
                 className="p-2 bg-red-600/20 rounded-lg"
               >
                 <Trash2 className="text-red-400" />

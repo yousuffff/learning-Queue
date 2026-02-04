@@ -13,7 +13,7 @@ function QueueList({ items, toggleComplete, deleteItem }) {
     <div className="space-y-4">
       {items.map((item) => (
         <QueueItem
-          key={item.id}
+          key={item.$id}
           item={item}
           toggleComplete={toggleComplete}
           deleteItem={deleteItem}

@@ -6,6 +6,12 @@ import AddItemForm from "./Components/AddItemForm";
 import Filters from "./Components/Filters";
 import QueueList from "./Components/QueueList";
 
+import { databases } from "./appwrite";
+import { ID } from "appwrite";
+
+const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
+const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID;
+
 /* ================== Helpers ================== */
 
 // Extract YouTube video ID
@@ -62,61 +68,151 @@ function App() {
 
   /* -------- LocalStorage -------- */
 
+  // useEffect(() => {
+  //   localStorage.setItem("learningQueue", JSON.stringify(items));
+  // }, [items]);
+
+  //-------appwrite------------
+
   useEffect(() => {
-    localStorage.setItem("learningQueue", JSON.stringify(items));
-  }, [items]);
+    const loadItems = async () => {
+      const res = await databases.listDocuments(DATABASE_ID, COLLECTION_ID);
+
+      setItems(res.documents);
+    };
+
+    loadItems();
+  }, []);
 
   /* -------- Actions -------- */
 
+  // const addItem = async () => {
+  //   if (!newUrl.trim()) return;
+
+  //   setLoading(true);
+
+  //   const baseItem = {
+  //     id: Date.now(),
+  //     url: newUrl,
+  //     category: category.trim() || "Uncategorized",
+  //     completed: false,
+  //     addedAt: new Date().toISOString(),
+  //     type: isYouTube(newUrl) ? "youtube" : "article",
+  //   };
+
+  //   let finalItem = { ...baseItem };
+
+  //   if (baseItem.type === "youtube") {
+  //     const videoId = getYouTubeId(newUrl);
+  //     if (videoId) {
+  //       const ytData = await fetchYouTubeData(videoId);
+  //       finalItem = {
+  //         ...finalItem,
+  //         title: ytData?.title || "YouTube Video",
+  //         thumbnail: ytData?.thumbnail,
+  //         author: ytData?.author,
+  //         videoId,
+  //       };
+  //     }
+  //   } else {
+  //     const webData = getFallbackWebMetadata(newUrl);
+  //     finalItem.title = webData.title;
+  //   }
+
+  //   setItems((prev) => [finalItem, ...prev]);
+  //   setNewUrl("");
+  //   setCategory("");
+  //   setLoading(false);
+  // };
+
   const addItem = async () => {
     if (!newUrl.trim()) return;
-
     setLoading(true);
 
     const baseItem = {
-      id: Date.now(),
       url: newUrl,
-      category: category.trim() || "Uncategorized",
+      category: category || "Uncategorized",
       completed: false,
-      addedAt: new Date().toISOString(),
       type: isYouTube(newUrl) ? "youtube" : "article",
     };
 
     let finalItem = { ...baseItem };
 
-    if (baseItem.type === "youtube") {
+    if (finalItem.type === "youtube") {
       const videoId = getYouTubeId(newUrl);
-      if (videoId) {
-        const ytData = await fetchYouTubeData(videoId);
-        finalItem = {
-          ...finalItem,
-          title: ytData?.title || "YouTube Video",
-          thumbnail: ytData?.thumbnail,
-          author: ytData?.author,
-          videoId,
-        };
-      }
+      const yt = await fetchYouTubeData(videoId);
+
+      finalItem = {
+        ...finalItem,
+        title: yt?.title || "YouTube Video",
+        thumbnail: yt?.thumbnail,
+        author: yt?.author,
+        video_id: videoId,
+      };
     } else {
-      const webData = getFallbackWebMetadata(newUrl);
-      finalItem.title = webData.title;
+      finalItem.title = getFallbackWebMetadata(newUrl).title;
     }
 
-    setItems((prev) => [finalItem, ...prev]);
+    const doc = await databases.createDocument(
+      DATABASE_ID,
+      COLLECTION_ID,
+      ID.unique(),
+      finalItem,
+    );
+
+    setItems((prev) => [doc, ...prev]);
     setNewUrl("");
     setCategory("");
     setLoading(false);
   };
 
-  const toggleComplete = (id) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, completed: !item.completed } : item,
-      ),
-    );
-  };
+  // const toggleComplete = (id) => {
+  //   setItems((prev) =>
+  //     prev.map((item) =>
+  //       item.id === id ? { ...item, completed: !item.completed } : item,
+  //     ),
+  //   );
+  // };
+  const toggleComplete = async (id, completed) => {
+    console.log("ID TYPE:", typeof id);
+    console.log("ID VALUE:", id);
 
-  const deleteItem = (id) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
+    try {
+      const res = await databases.updateDocument(
+        DATABASE_ID,
+        COLLECTION_ID,
+        id,
+        { completed: !completed },
+        [], // permissions (empty = keep existing)
+      );
+
+      setItems((prev) =>
+        prev.map((item) =>
+          item.$id === id ? { ...item, completed: res.completed } : item,
+        ),
+      );
+    } catch (err) {
+      console.error("UPDATE FAILED:", err);
+    }
+  };
+  // const toggleComplete = async (id) => {
+  //   try {
+  //     await databases.updateDocument(DATABASE_ID, COLLECTION_ID, id, {
+  //       completed: true,
+  //     });
+  //     console.log("UPDATE OK");
+  //   } catch (e) {
+  //     console.error("UPDATE ERROR FULL:", e);
+  //   }
+  // };
+
+  // const deleteItem = (id) => {
+  //   setItems((prev) => prev.filter((item) => item.id !== id));
+  // };
+  const deleteItem = async (id) => {
+    await databases.deleteDocument(DATABASE_ID, COLLECTION_ID, id);
+
+    setItems((prev) => prev.filter((item) => item.$id !== id));
   };
 
   /* -------- Derived Data -------- */
