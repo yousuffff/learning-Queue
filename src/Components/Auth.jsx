@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { loginUser, registerUser } from "../auth";
 
-function Auth({ onAuth }) {
+function Auth({ onAuth, defaultMode = "login" }) {
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isRegister, setIsRegister] = useState(false);
+  const [isRegister, setIsRegister] = useState(defaultMode === "signup");
   const [error, setError] = useState("");
 
   const handleSubmit = async () => {
@@ -27,9 +28,7 @@ function Auth({ onAuth }) {
           {isRegister ? "Create account" : "Login"}
         </h2>
 
-        {error && (
-          <p className="text-red-400 text-sm mb-2">{error}</p>
-        )}
+        {error && <p className="text-red-400 text-sm mb-2">{error}</p>}
 
         <input
           className="w-full mb-2 p-2 rounded bg-slate-700"
