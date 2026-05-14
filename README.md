@@ -45,28 +45,6 @@ A full-stack productivity application built with React.js and Appwrite that allo
 
 ---
 
-## 📸 Screenshots
-
-### Dashboard
-
-```md
-![Dashboard](./screenshots/dashboard.png)
-```
-
-### Filtered Queue
-
-```md
-![Filter](./screenshots/filter.png)
-```
-
-### Completed Items
-
-```md
-![Completed](./screenshots/completed.png)
-```
-
----
-
 ## 📂 Folder Structure
 
 ```bash
